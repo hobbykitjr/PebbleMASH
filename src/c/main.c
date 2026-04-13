@@ -238,7 +238,7 @@ static void canvas_proc(Layer *l, GContext *ctx) {
       bool is_go = (idx == NUM_CATS);
 
       if(is_go) {
-        if(s_num_active > 0) {
+        if(s_num_active >= 2) {
           // Pencil-shaped GO button
           int bw = 90, bx = (w - bw) / 2;
           #ifdef PBL_COLOR
@@ -433,19 +433,26 @@ static void canvas_proc(Layer *l, GContext *ctx) {
     graphics_context_set_stroke_width(ctx, 2);
     graphics_draw_line(ctx, GPoint(w/4, cy + 62), GPoint(w*3/4, cy + 62));
 
+    // Show remaining per category
     graphics_context_set_text_color(ctx, GColorDarkGray);
     if(s_elim_done) {
-      graphics_draw_text(ctx, "All decided!", f_md,
+      #ifdef PBL_COLOR
+      graphics_context_set_text_color(ctx, GColorFromHEX(0x005500));
+      #endif
+      graphics_draw_text(ctx, "Your fate is sealed!", f_md,
         GRect(0, cy + 82, w, 22),
         GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
-      graphics_draw_text(ctx, "SELECT: your future!", f_sm,
+      graphics_context_set_text_color(ctx, GColorDarkGray);
+      graphics_draw_text(ctx, "SELECT: reveal future!", f_sm,
         GRect(0, cy + 106, w, 16),
         GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
     } else {
-      int total_rem = 0;
+      // Show how many categories still undecided
+      int cats_left = 0;
       for(int c = 0; c < NUM_CATS; c++)
-        if(s_cat_active[c]) total_rem += remaining_in_cat(c);
-      char rem[16]; snprintf(rem, sizeof(rem), "%d left", total_rem);
+        if(s_cat_active[c] && remaining_in_cat(c) > 1) cats_left++;
+      char rem[24]; snprintf(rem, sizeof(rem), "%d categor%s left",
+        cats_left, cats_left == 1 ? "y" : "ies");
       graphics_draw_text(ctx, rem, f_sm,
         GRect(0, cy + 86, w, 16),
         GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
@@ -512,7 +519,7 @@ static void canvas_proc(Layer *l, GContext *ctx) {
 static void select_click(ClickRecognizerRef ref, void *ctx) {
   if(s_state == ST_CATS) {
     if(s_cursor == NUM_CATS) {
-      if(s_num_active > 0) {
+      if(s_num_active >= 2) {
         for(int c = 0; c < NUM_CATS; c++)
           for(int i = 0; i < PICKS_PER; i++) s_eliminated[c][i] = false;
         s_elim_pos = -1;
@@ -576,7 +583,6 @@ static void select_click(ClickRecognizerRef ref, void *ctx) {
   else if(s_state == ST_READY) {
     stop_spinning();
     do_elimination();
-    vibes_short_pulse();
     s_state = ST_ELIM;
   }
   else if(s_state == ST_ELIM) {
@@ -585,7 +591,7 @@ static void select_click(ClickRecognizerRef ref, void *ctx) {
       s_state = ST_FORTUNE;
     } else {
       do_elimination();
-      vibes_short_pulse();
+      if(s_elim_done) vibes_long_pulse();
     }
   }
   else if(s_state == ST_FORTUNE) {
@@ -600,7 +606,7 @@ static void select_click(ClickRecognizerRef ref, void *ctx) {
 static void up_click(ClickRecognizerRef ref, void *ctx) {
   if(s_state == ST_CATS) {
     // Wrap around
-    int total = NUM_CATS + (s_num_active > 0 ? 1 : 0);
+    int total = NUM_CATS + (s_num_active >= 2 ? 1 : 0);
     s_cursor = (s_cursor + total - 1) % total;
   } else if(s_state == ST_OPTS) {
     s_cursor = (s_cursor + NUM_OPTS - 1) % NUM_OPTS;
@@ -612,7 +618,7 @@ static void up_click(ClickRecognizerRef ref, void *ctx) {
 
 static void down_click(ClickRecognizerRef ref, void *ctx) {
   if(s_state == ST_CATS) {
-    int total = NUM_CATS + (s_num_active > 0 ? 1 : 0);
+    int total = NUM_CATS + (s_num_active >= 2 ? 1 : 0);
     s_cursor = (s_cursor + 1) % total;
   } else if(s_state == ST_OPTS) {
     s_cursor = (s_cursor + 1) % NUM_OPTS;
