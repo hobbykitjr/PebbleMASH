@@ -158,6 +158,145 @@ static void stop_spinning(void) {
 }
 
 // ============================================================================
+// NOTEBOOK DOODLES (drawn in pencil gray)
+// ============================================================================
+static void doodle_color(GContext *ctx) {
+  #ifdef PBL_COLOR
+  graphics_context_set_stroke_color(ctx, GColorFromHEX(0xAAAA55));
+  graphics_context_set_fill_color(ctx, GColorFromHEX(0xAAAA55));
+  #else
+  graphics_context_set_stroke_color(ctx, GColorLightGray);
+  graphics_context_set_fill_color(ctx, GColorLightGray);
+  #endif
+  graphics_context_set_stroke_width(ctx, 1);
+}
+
+// The "Cool S" / Stussy S (~12x20px)
+static void draw_cool_s(GContext *ctx, int x, int y) {
+  doodle_color(ctx);
+  // Top 3 lines
+  graphics_draw_line(ctx, GPoint(x-3, y-10), GPoint(x-3, y-4));
+  graphics_draw_line(ctx, GPoint(x,   y-10), GPoint(x,   y-4));
+  graphics_draw_line(ctx, GPoint(x+3, y-10), GPoint(x+3, y-4));
+  // Top cap
+  graphics_draw_line(ctx, GPoint(x-3, y-10), GPoint(x, y-13));
+  graphics_draw_line(ctx, GPoint(x+3, y-10), GPoint(x, y-13));
+  // Middle cross
+  graphics_draw_line(ctx, GPoint(x-3, y-4), GPoint(x+3, y+4));
+  graphics_draw_line(ctx, GPoint(x+3, y-4), GPoint(x-3, y+4));
+  // Bottom 3 lines
+  graphics_draw_line(ctx, GPoint(x-3, y+4), GPoint(x-3, y+10));
+  graphics_draw_line(ctx, GPoint(x,   y+4), GPoint(x,   y+10));
+  graphics_draw_line(ctx, GPoint(x+3, y+4), GPoint(x+3, y+10));
+  // Bottom cap
+  graphics_draw_line(ctx, GPoint(x-3, y+10), GPoint(x, y+13));
+  graphics_draw_line(ctx, GPoint(x+3, y+10), GPoint(x, y+13));
+}
+
+// Stick figure (~14x20px)
+static void draw_stickfig(GContext *ctx, int x, int y) {
+  doodle_color(ctx);
+  graphics_draw_circle(ctx, GPoint(x, y-8), 3); // head
+  graphics_draw_line(ctx, GPoint(x, y-5), GPoint(x, y+4)); // body
+  graphics_draw_line(ctx, GPoint(x, y-2), GPoint(x-5, y-6)); // left arm
+  graphics_draw_line(ctx, GPoint(x, y-2), GPoint(x+5, y-6)); // right arm
+  graphics_draw_line(ctx, GPoint(x, y+4), GPoint(x-4, y+10)); // left leg
+  graphics_draw_line(ctx, GPoint(x, y+4), GPoint(x+4, y+10)); // right leg
+}
+
+// Heart (~10x10px)
+static void draw_heart(GContext *ctx, int x, int y) {
+  doodle_color(ctx);
+  graphics_fill_circle(ctx, GPoint(x-3, y-2), 3);
+  graphics_fill_circle(ctx, GPoint(x+3, y-2), 3);
+  for(int i = 0; i < 6; i++) {
+    int hw = 5 - i;
+    if(hw > 0)
+      graphics_fill_rect(ctx, GRect(x-hw, y+i, hw*2+1, 1), 0, GCornerNone);
+  }
+}
+
+// 3D cube (~14x16px)
+static void draw_cube(GContext *ctx, int x, int y) {
+  doodle_color(ctx);
+  // Front face
+  graphics_draw_rect(ctx, GRect(x-5, y-3, 10, 10));
+  // Back edges
+  graphics_draw_line(ctx, GPoint(x-5, y-3), GPoint(x-1, y-7));
+  graphics_draw_line(ctx, GPoint(x+5, y-3), GPoint(x+9, y-7));
+  graphics_draw_line(ctx, GPoint(x-1, y-7), GPoint(x+9, y-7));
+  graphics_draw_line(ctx, GPoint(x+5, y+7), GPoint(x+9, y+3));
+  graphics_draw_line(ctx, GPoint(x+9, y-7), GPoint(x+9, y+3));
+}
+
+// Star (~12x12px)
+static void draw_star(GContext *ctx, int x, int y) {
+  doodle_color(ctx);
+  // 5-pointed star via lines
+  graphics_draw_line(ctx, GPoint(x, y-7), GPoint(x+2, y-2));
+  graphics_draw_line(ctx, GPoint(x+2, y-2), GPoint(x+7, y-2));
+  graphics_draw_line(ctx, GPoint(x+7, y-2), GPoint(x+3, y+2));
+  graphics_draw_line(ctx, GPoint(x+3, y+2), GPoint(x+5, y+7));
+  graphics_draw_line(ctx, GPoint(x+5, y+7), GPoint(x, y+4));
+  graphics_draw_line(ctx, GPoint(x, y+4), GPoint(x-5, y+7));
+  graphics_draw_line(ctx, GPoint(x-5, y+7), GPoint(x-3, y+2));
+  graphics_draw_line(ctx, GPoint(x-3, y+2), GPoint(x-7, y-2));
+  graphics_draw_line(ctx, GPoint(x-7, y-2), GPoint(x-2, y-2));
+  graphics_draw_line(ctx, GPoint(x-2, y-2), GPoint(x, y-7));
+}
+
+// Smiley (~10x10px)
+static void draw_smiley(GContext *ctx, int x, int y) {
+  doodle_color(ctx);
+  graphics_draw_circle(ctx, GPoint(x, y), 6);
+  graphics_fill_circle(ctx, GPoint(x-2, y-2), 1);
+  graphics_fill_circle(ctx, GPoint(x+2, y-2), 1);
+  // Smile arc (approximated)
+  graphics_draw_line(ctx, GPoint(x-3, y+2), GPoint(x-1, y+4));
+  graphics_draw_line(ctx, GPoint(x-1, y+4), GPoint(x+1, y+4));
+  graphics_draw_line(ctx, GPoint(x+1, y+4), GPoint(x+3, y+2));
+}
+
+// Flower (~12x12px)
+static void draw_flower(GContext *ctx, int x, int y) {
+  doodle_color(ctx);
+  // Petals
+  graphics_draw_circle(ctx, GPoint(x, y-4), 3);
+  graphics_draw_circle(ctx, GPoint(x+4, y-1), 3);
+  graphics_draw_circle(ctx, GPoint(x+2, y+3), 3);
+  graphics_draw_circle(ctx, GPoint(x-2, y+3), 3);
+  graphics_draw_circle(ctx, GPoint(x-4, y-1), 3);
+  // Center
+  graphics_fill_circle(ctx, GPoint(x, y), 2);
+}
+
+// Draw 1-2 random doodles based on a seed
+static void draw_doodles(GContext *ctx, int w, int h, int seed) {
+  // Use seed to pick consistent doodles per screen
+  int r = seed * 7 + 13;
+  int num = 1 + (r % 2); // 1-2 doodles
+  void (*doodle_fns[])(GContext*, int, int) = {
+    draw_cool_s, draw_stickfig, draw_heart,
+    draw_cube, draw_star, draw_smiley, draw_flower
+  };
+  int num_fns = 7;
+
+  for(int d = 0; d < num; d++) {
+    int fn_idx = (r + d * 31) % num_fns;
+    // Position: right margin area or bottom corners
+    int dx, dy;
+    if(d == 0) {
+      dx = w - PBL_IF_ROUND_ELSE(38, 18);
+      dy = h * 30 / 100 + ((r >> 2) % 60);
+    } else {
+      dx = PBL_IF_ROUND_ELSE(30, 14);
+      dy = h * 60 / 100 + ((r >> 4) % 40);
+    }
+    doodle_fns[fn_idx](ctx, dx, dy);
+  }
+}
+
+// ============================================================================
 // NOTEBOOK DRAWING
 // ============================================================================
 static void draw_notebook(GContext *ctx, int w, int h, int line_start) {
@@ -213,6 +352,7 @@ static void canvas_proc(Layer *l, GContext *ctx) {
   if(s_state == ST_CATS) {
     int title_y = PBL_IF_ROUND_ELSE(pad + 6, pad);
     draw_notebook(ctx, w, h, title_y + 34);
+    draw_doodles(ctx, w, h, 1);
 
     #ifdef PBL_COLOR
     graphics_context_set_text_color(ctx, GColorFromHEX(0x0000AA));
@@ -304,6 +444,7 @@ static void canvas_proc(Layer *l, GContext *ctx) {
   else if(s_state == ST_OPTS) {
     int title_y = PBL_IF_ROUND_ELSE(pad + 6, pad);
     draw_notebook(ctx, w, h, title_y + 24);
+    draw_doodles(ctx, w, h, s_cur_cat + 10);
 
     int picked = 0;
     for(int i = 0; i < NUM_OPTS; i++) if(s_opt_selected[i]) picked++;
@@ -359,6 +500,7 @@ static void canvas_proc(Layer *l, GContext *ctx) {
   // ======== READY (spinning number) ========
   else if(s_state == ST_READY) {
     draw_notebook(ctx, w, h, 40);
+    draw_doodles(ctx, w, h, 20);
     int cy = h / 2 - 50;
 
     #ifdef PBL_COLOR
@@ -394,6 +536,7 @@ static void canvas_proc(Layer *l, GContext *ctx) {
   // ======== ELIMINATION ========
   else if(s_state == ST_ELIM) {
     draw_notebook(ctx, w, h, 40);
+    draw_doodles(ctx, w, h, 30 + s_elim_show_cat);
     int cy = h / 2 - 50;
 
     // Lucky number
@@ -466,6 +609,7 @@ static void canvas_proc(Layer *l, GContext *ctx) {
   else if(s_state == ST_FORTUNE) {
     int title_y = PBL_IF_ROUND_ELSE(pad + 6, pad);
     draw_notebook(ctx, w, h, title_y + 34);
+    draw_doodles(ctx, w, h, 50);
 
     #ifdef PBL_COLOR
     graphics_context_set_text_color(ctx, GColorFromHEX(0x0000AA));
